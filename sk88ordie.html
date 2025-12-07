@@ -58,7 +58,7 @@ const SFX={jump:'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYA
   setInterval(()=>{
     if(overlay.style.display==='flex')return;
     secs=Math.max(0,secs-1);
-    countdownEl.textContent=secs?`Doom in: ${secs}`:'WELCOME TO HELL';
+    countdownEl.textContent=secs?`Doom in: ${secs}`:'SKATE OR DIE!';
     if(secs<=0) overlay.style.display='flex';
   },1000);
 

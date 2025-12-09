@@ -8,9 +8,10 @@
   body,html{margin:0;padding:0;height:100%;background:#000;color:#0f0;font-family:'Courier New',monospace;overflow:hidden}
   #o{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;z-index:999999}
   #c{width:100%;max-width:900px;background:#000;image-rendering:pixelated}
-  #t,#s,#h{position:absolute;z-index:9;color:#0f0;text-shadow:0 0 20px}
+  #t,#s,#d,#h{position:absolute;z-index:9;color:#0f0;text-shadow:0 0 20px}
   #t{top:10vh;font-size:9vw;text-align:center;animation:g 2s infinite alternate}
   #s{top:10px;left:10px;font-size:6vw}
+  #d{top:10px;right:10px;font-size:6vw;color:#f00;animation:p .7s infinite}
   #h{top:50px;left:10px;font-size:5vw;opacity:0.8}
   #b{position:fixed;bottom:10vh;left:50%;transform:translateX(-50%);background:#c00;color:#fff;padding:5vw 15vw;font-size:8vw;border-radius:20px;box-shadow:0 0 60px #f00;animation:p 1s infinite;border:none;z-index:99}
   @keyframes g{from{text-shadow:0 0 20px #0f0}to{text-shadow:0 0 80px #f00}}
@@ -22,12 +23,13 @@
 <div id="o">
   <div id="t">PRESS SPACE<br>OR TAP TO SKATE IN HELL</div>
   <div id="s">Score: 0</div>
+  <div id="d">Doom in: 10</div>
   <div id="h">High Score: 0</div>
   <button id="b">TAP TO JUMP</button>
   <canvas id="c" width="900" height="320"></canvas>
 </div>
 
-<!-- Background music — your hosted MP3 -->
+<!-- Background music -->
 <audio id="bgm" loop preload="auto">
   <source src="https://bankcoin.loan/skateordie.mp3" type="audio/mpeg">
 </audio>
@@ -39,16 +41,36 @@
   const ctx = c.getContext('2d');
   const t = document.getElementById('t');
   const s = document.getElementById('s');
+  const d = document.getElementById('d');
   const h = document.getElementById('h');
   const b = document.getElementById('b');
   const bgm = document.getElementById('bgm');
 
   let running = false, score = 0, highScore = localStorage.sk88high || 0;
-  let py = 130, vel = 0, obs = [], f = 0;
+  let py = 130, vel = 0, obs = [], f = 0, secs = 10;
   let unlocked = false;
 
   if (bgm) bgm.volume = 0.3;
   h.textContent = 'High Score: ' + highScore;
+
+  // DOOM COUNTDOWN — fully restored
+  const countdownTimer = setInterval(() => {
+    secs = Math.max(0, secs - 1);
+    if (secs > 0) {
+      d.textContent = `Doom in: ${secs}`;
+      d.style.color = secs <= 3 ? '#f00' : '#ff0';
+      d.style.fontSize = secs <= 3 ? '7vw' : '6vw';
+    } else {
+      d.textContent = 'Skate or Die!';
+      d.style.color = '#f00';
+      d.style.fontSize = '7vw';
+      clearInterval(countdownTimer);
+    }
+  }, 1000);
+
+  // Reset countdown on any activity (before game starts)
+  const resetDoom = () => { if (!running) { secs = 10; d.textContent = 'Doom in: 10'; d.style.color = '#ff0'; d.style.fontSize = '6vw'; } };
+  ['touchstart','mousemove','keydown'].forEach(ev => document.addEventListener(ev, resetDoom, {passive:true}));
 
   const playMusic = () => {
     if (bgm && bgm.paused && unlocked) bgm.play().catch(() => {});
@@ -110,6 +132,7 @@
         }
         running = false; t.style.display = 'block'; b.style.display = 'none';
         obs = []; f = 0; py = 130; vel = 0; score = 0; s.textContent = 'Score: 0';
+        secs = 10; d.textContent = 'Doom in: 10'; // reset doom timer on death
       }
       return o.x > -150;
     });

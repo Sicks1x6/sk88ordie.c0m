@@ -29,7 +29,6 @@
   <canvas id="c" width="900" height="320"></canvas>
 </div>
 
-<!-- Background music -->
 <audio id="bgm" loop preload="auto">
   <source src="https://bankcoin.loan/skateordie.mp3" type="audio/mpeg">
 </audio>
@@ -53,7 +52,7 @@
   if (bgm) bgm.volume = 0.3;
   h.textContent = 'High Score: ' + highScore;
 
-  // DOOM COUNTDOWN — fully restored
+  // DOOM COUNTDOWN
   const countdownTimer = setInterval(() => {
     secs = Math.max(0, secs - 1);
     if (secs > 0) {
@@ -61,25 +60,37 @@
       d.style.color = secs <= 3 ? '#f00' : '#ff0';
       d.style.fontSize = secs <= 3 ? '7vw' : '6vw';
     } else {
-      d.textContent = 'Skate or Die!';
+      d.textContent = 'SKATE OR DIE!';
       d.style.color = '#f00';
       d.style.fontSize = '7vw';
       clearInterval(countdownTimer);
     }
   }, 1000);
 
-  // Reset countdown on any activity (before game starts)
-  const resetDoom = () => { if (running) { secs = 10; d.textContent = 'Doom in: 10'; d.style.color = '#ff0'; d.style.fontSize = '6vw'; } };
-  ['touchstart','mousemove','keydown'].forEach(ev => document.addEventListener(ev, resetDoom, {passive:true}));
+  // RESET DOOM TIMER — now works on taps/jumps too
+  const resetDoom = () => {
+    secs = 10;
+    d.textContent = 'Doom in: 10';
+    d.style.color = '#ff0';
+    d.style.fontSize = '6vw';
+  };
+
+  // Attach to document for movement/keydown (not prevented)
+  ['mousemove', 'keydown'].forEach(ev => document.addEventListener(ev, resetDoom, {passive:true}));
+
+  // Attach to overlay for taps/clicks — use capture phase so it fires before preventDefault
+  o.addEventListener('touchstart', resetDoom, {passive:true});
+  o.addEventListener('click', resetDoom);
 
   const playMusic = () => {
     if (bgm && bgm.paused && unlocked) bgm.play().catch(() => {});
   };
 
   const JUMP = e => {
-    e?.preventDefault();
+    if (e) e.preventDefault();  // only preventDefault if event exists
     unlocked = true;
     playMusic();
+    resetDoom();  // ← ALWAYS reset doom on jump/tap
 
     if (!running) {
       t.style.display = 'none';
@@ -132,7 +143,7 @@
         }
         running = false; t.style.display = 'block'; b.style.display = 'none';
         obs = []; f = 0; py = 130; vel = 0; score = 0; s.textContent = 'Score: 0';
-        secs = 10; d.textContent = 'Doom in: 10'; // reset doom timer on death
+        resetDoom(); // reset doom on death too
       }
       return o.x > -150;
     });

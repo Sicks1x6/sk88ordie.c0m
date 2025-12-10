@@ -69,7 +69,7 @@
   }, 1000);
 
   // Reset countdown on any activity (before game starts)
-  const resetDoom = () => { if (!running) { secs = 10; d.textContent = 'Doom in: 10'; d.style.color = '#ff0'; d.style.fontSize = '6vw'; } };
+  const resetDoom = () => { if (running) { secs = 10; d.textContent = 'Doom in: 10'; d.style.color = '#ff0'; d.style.fontSize = '6vw'; } };
   ['touchstart','mousemove','keydown'].forEach(ev => document.addEventListener(ev, resetDoom, {passive:true}));
 
   const playMusic = () => {
